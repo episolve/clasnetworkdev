@@ -1,0 +1,462 @@
+<?php
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+require_once dirname(__FILE__) . '/includes/bootstrap_theme.api.php';
+require_once dirname(__FILE__) . '/includes/page.profile.php';
+
+/**
+ * @see hook_menu().
+ */
+function bootstrap_theme_menu() {
+    $items = array();
+
+    $items['bootstrap_theme/home'] = array(
+        'title' => 'Homepage',
+        'page callback' => 'bootstrap_theme_home_page',
+        'access callback'    => TRUE,
+        'file' => 'includes/page.home.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['bootstrap_theme/home/banner'] = array(
+        'title' => 'Homepage',
+        'page callback' => 'bootstrap_theme_home_page',
+        'page arguments' => array(TRUE),
+        'access callback'    => TRUE,
+        'file' => 'includes/page.home.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['dashboard'] = array(
+        'title' => 'Dashboard',
+        'page callback' => 'bootstrap_theme_dashboard_page',
+        'access callback'    => 'bootstrap_theme_page_access',
+        'file' => 'includes/page.dashboard.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['dashboard/%'] = array(
+        'title' => 'Dashboard',
+        'page callback' => 'bootstrap_theme_dashboard_page',
+        'page arguments' => array(1),
+        'access callback'    => 'bootstrap_theme_page_access',
+        'file' => 'includes/page.dashboard.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['dashboard/%/%'] = array(
+        'title' => 'Dashboard',
+        'page callback' => 'bootstrap_theme_dashboard_page',
+        'page arguments' => array(1, 2),
+        'access callback'    => 'bootstrap_theme_page_access',
+        'file' => 'includes/page.dashboard.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['collection/%'] = array(
+        'title' => 'Collections',
+        'page callback' => 'bootstrap_theme_collection_page',
+        'page arguments' => array(1),
+        //'access callback'    => 'bootstrap_theme_page_access',
+        'access callback'    => TRUE,
+        'file' => 'includes/page.collection.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['user/%user/about-me'] = array(
+        'title' => 'About Me',
+        'page callback' => 'bootstrap_theme_profile_aboutme_page',
+        'page arguments' => array(1),
+        'access callback'    => 'bootstrap_theme_page_access',
+        'file' => 'includes/page.profile.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['user/%user/approve-contributor'] = array(
+        'page callback' => 'bootstrap_theme_approve_contributor',
+        'page arguments' => array(1),
+        'access callback'    => 'bootstrap_theme_is_editor',
+        'file' => 'includes/page.profile.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['user/%user/to-become-contributor'] = array(
+        'page callback' => 'bootstrap_theme_dashboard_request_to_be_contributor',
+        'page arguments' => array(1),
+        'access callback'    => 'bootstrap_theme_page_access',
+        'file' => 'includes/page.dashboard.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['pending-approval'] = array(
+        'page callback' => 'bootstrap_theme_pending_approval_page',
+        /*'page arguments' => array(1),*/
+        'access callback'    => 'user_is_logged_in',
+        'file' => 'includes/page.dashboard.pending_approval.php',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['contacts'] = array(
+        'title' => 'Contact Us',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('contact_site_form'),
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+        'file' => '../../../../'.drupal_get_path('module', 'contact').'/contact.pages.inc',
+    );
+
+    $items['dashboard/collection/delete/%'] = array(
+        'title' => 'Delete Collection',
+        'page callback' => 'bootstrap_theme_delete_collection',
+        'page arguments' => array(3),
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+        'file' => 'includes/page.dashboard.php',
+        'delivery callback' => 'ajax_deliver',
+    );
+	
+	$items['dashboard/badge/delete/%'] = array(
+        'title' => 'Delete Badge',
+        'page callback' => 'bootstrap_theme_delete_badge',
+        'page arguments' => array(3),
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+        'file' => 'includes/page.dashboard.php',
+        'delivery callback' => 'ajax_deliver',
+    );
+
+    $items['category/%'] = array(
+        'title' => 'Vocabulary Content',
+        'page callback' => 'bootstrap_theme_category_page',
+        'page arguments' => array(1),
+        'access callback'    => TRUE,
+        'file' => 'includes/page.category.php',
+        'type' => MENU_CALLBACK
+    );
+
+    return $items;
+}
+
+function bootstrap_theme_page_access() {
+    return user_is_logged_in();
+}
+
+function bootstrap_theme_theme() {
+    $themes = array(
+        'bootstrap_theme_create_comment_form' => array(
+            'render element' => 'form',
+        ),
+        'bootstrap_theme_change_collection_form' => array(
+            'render element' => 'form',
+        ),
+    );
+    return $themes;
+}
+
+function bootstrap_theme_block_info() {
+    $blocks = array();
+
+    $blocks['bootstrap-footer-section'] = array(
+        'info' => t('Bootstrap Footer Section'),
+        'status' => TRUE,
+        'region' => 'footer',
+        'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+        'pages' => '',
+    );
+
+    $blocks['bootstrap-login-navigation'] = array(
+        'info' => t('Bootstrap Navigation on LOGON'),
+        'status' => TRUE,
+        'region' => 'footer',
+        'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+        'pages' => '',
+    );
+
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ */
+function bootstrap_theme_block_view($delta = '') {
+    switch ($delta) {
+        case 'bootstrap-footer-section':
+            return bootstrap_theme_footer_section();
+            break;
+        case 'bootstrap-login-navigation':
+            return bootstrap_theme_nav_section();
+            break;
+        default:
+            break;
+    }
+    return NULL;
+}
+
+
+
+function bootstrap_theme_nav_section() {
+    global $user;
+
+    $output  = '';
+    $current_url = request_uri();
+
+    $url_prefix = arg(0);
+
+    if (user_is_logged_in()) {
+        $output .= '<ul class="nav-logon nav pull-right">';
+            $output .= '<li class="dashboard '.($url_prefix == 'dashboard' ||$url_prefix == 'collection'?'active':'').'">';
+                $output .= '<a href="'.url('dashboard').'">Dashboard</a>';
+            $output .= '</li>';
+            $output .= '<li class="messages '.($url_prefix == 'messages'?'active':'').'">';
+                $output .= '<a href="'.url('messages').'">Messages</a>';
+            $output .= '</li>';
+            $output .= '<li class="profile '.($url_prefix == 'user'?'active':'').'">';
+                $output .= '<a href="'.url('user/'.$user->uid.'').'">My Profile</a>';
+            $output .= '</li>';
+            $output .= '<li class="settings dropdown">';
+                $output .= '<a class="dropdown-toggle" href="#" data-toggle="dropdown">Settings</a>';
+                $output .= '<div class="dropdown-menu embedded-form">';
+                    $output .= '<a href="'.url('user/'.$user->uid.'/profile').'">My Profile</a>';
+                    $output .= '<a href="'.url('user/'.$user->uid).'">Account</a>';
+                    $output .= '<a href="'.url('user/logout').'">Log out</a>';
+                $output .= '</div>';
+            $output .= '</li>';
+        $output .= '</ul>';
+    }
+
+    return array(
+        'subject' => NULL,
+        'content' => $output
+    );
+}
+
+function bootstrap_theme_footer_section() {
+    $output = '';
+    $output.= '<div class="footer-links">';
+        $output .= '<div class="footer-links-left">';
+            $output .= '<span>&copy;'.date('Y').' CLAS&nbsp;&nbsp;&nbsp;</span>';
+            $output .= '<a href="'.url('node/184').'">Terms</a><span>&nbsp;-&nbsp;</span>';
+            $output .= '<a href="'.url('node/185').'">Privacy</a><span>&nbsp;-&nbsp;</span>';
+            $output .= '<a href="'.url('node/186').'">Security</a><span>&nbsp;-&nbsp;</span>';
+            $output .= '<a href="'.url('contacts').'">Contact</a>';
+        $output .= '</div>';
+        /*$output .= '<div class="footer-links-right">';
+            $output .= '<a href="#">Status</a><span>&nbsp;-&nbsp;</span>';
+            $output .= '<a href="#">API</a><span>&nbsp;-&nbsp;</span>';
+            $output .= '<a href="#">Training</a><span>&nbsp;-&nbsp;</span>';
+            $output .= '<a href="#">Blog</a><span>&nbsp;-&nbsp;</span>';
+            $output .= '<a href="#">About</a>';
+        $output .= '</div>';*/
+    $output .= '</div>';
+
+    return array(
+        'subject' => NULL,
+        'content' => $output
+    );
+}
+
+function bootstrap_theme_mail($key, &$message, $params) {
+    $language = $message['language'];
+    switch ($key) {
+        case 'to_become_contributor':
+            $message['subject'] .= $params['subject'];
+            $message['body'][] = $params['message'];
+            break;
+        default:
+            break;
+    }
+}
+
+function bootstrap_theme_node_submit($node, $form, &$form_stats) {
+}
+
+function bootstrap_theme_node_presave($node) {
+	if(trim($node->type) == 'clas_network_object_beta')
+	{
+		if(isset($node->cno_badge))
+		{
+			$node->field_cnob_assigned_badge[$node->language][0]['value'] = $node->cno_badge;
+		}
+	}
+	else if(trim($node->type) == 'badges')
+	{
+		if(isset($node->original->field_assign_badge_to_users))
+		{
+			$node->field_assign_badge_to_users['und'] = $node->original->field_assign_badge_to_users['und'];
+		}
+	}
+	//print_r($node);
+    //print_r(taxonomy_vocabulary_load(TAXONOMY_VOCABULARY_ID_TAGS));
+    //exit;
+}
+
+function bootstrap_theme_node_delete($node) {
+    global $user;
+    if ($node->type == NODE_TYPE_CLAS_COLLECTION) {
+        $contributions = bootstrap_theme_get_contributions(NODE_PUBLISHED, $user, $node->nid);
+        foreach ($contributions as $contribution)
+            node_delete($contribution->nid);
+        $contributions = bootstrap_theme_get_contributions(NODE_NOT_PUBLISHED, $user, $node->nid);
+        foreach ($contributions as $contribution)
+            node_delete($contribution->nid);
+    }
+}
+
+
+function bootstrap_theme_menu_alter(&$items) {
+    //echo drupal_get_path('module', 'bootstrap_theme').'/includes/page.profile.php';exit;
+    $items['user/%user']['page callback'] = 'bootstrap_theme_profile_page';
+    $items['user/%user']['file'] = '../../'.drupal_get_path('module', 'bootstrap_theme').'/includes/page.profile.php';
+
+//    $items['user/%user/edit']['page callback'] = 'bootstrap_theme_user_edit_page';
+//    $items['user/%user/edit']['file'] = '../../'.drupal_get_path('module', 'bootstrap_theme').'/includes/page.profile.php';
+//    $items['user/%user/edit']['page arguments'] = array(1);
+    $items['node/%node']['page callback'] = 'bootstrap_theme_display_node_content';
+    $items['node/%node']['file'] = '../../'.drupal_get_path('module', 'bootstrap_theme').'/includes/page.content.php';
+
+    $items['messages']['page callback'] = 'bootstrap_theme_messages_page';
+    $items['messages']['file'] = '../../../../'.drupal_get_path('module', 'bootstrap_theme').'/includes/page.messages.php';
+    //$items['messages']['file'] = 'includes/page.messages.php';
+    //$items['messages']['path'] = drupal_get_path('module', 'bootstrap_theme');
+}
+
+
+
+function _bootstrap_theme_ajax_callback($form, $form_state) {
+    ctools_include('ajax');
+    ctools_add_js('ajax-responder');
+
+    if (form_get_errors()) {
+        return $form; // Reload form if it didn't pass validation.
+    }
+
+    if ($form['#id'] === 'user-login') {
+        drupal_set_message(check_plain('Successful login'));
+    }
+
+    $commands = array();
+    //$commands[] = ctools_ajax_command_reload();
+    if ($form['#id'] === 'user-login') {
+        $commands[] = ctools_ajax_command_redirect('dashboard');
+    } else {
+        $commands[] = ctools_ajax_command_reload();
+    }
+
+    return array(
+        '#type' => 'ajax',
+        '#commands' => $commands
+    );
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function bootstrap_theme_form_alter(&$form, &$form_state, $form_id) {
+global $user;
+if($form_id == 'clas_network_object_node_form' && !in_array('administrator',$user->roles) && !in_array('editor',$user->roles))
+	{
+		unset($form['field_cnob_is_featured']);
+	
+	}
+	//global $user;
+	if($form_id == 'badges_node_form' && !in_array('administrator',$user->roles))
+	{
+	    $form['field_assign_badge_to_users']['und']['#required'] = 0;
+		$form['field_assign_badge_to_users']['#type'] = 'hidden';
+		$form['#redirect'] = 'dashboard/badges';
+	}
+	
+	switch ($form_id) {
+        case 'user_login':
+        case 'user_register_form':
+
+            require_once 'includes/page.home.php';
+            // Add ajax wrapper to form.
+            $html_id = str_replace('_', '-', $form_id);
+            $form['#prefix'] = '<div id="ajax-' . $html_id . '-wrapper">';
+            $form['#suffix'] = '</div>';
+
+            // Add ajax functionality to form submit button.
+            $form['actions']['submit']['#ajax'] = array(
+                'callback' => '_bootstrap_theme_ajax_callback',
+                'wrapper' => 'ajax-' . $html_id . '-wrapper',
+                'event' => 'click',
+            );
+
+            break;
+
+        case 'user_profile_form':
+            //$form['#validate'][] = 'bootstrap_theme_user_profile_form_validate';
+            //$form['#submit'][] = 'bootstrap_theme_user_profile_form_submit';
+            $account = $form_state['build_info']['args'][0];
+            bootstrap_theme_set_page_content_class('profile-edit public-profile-page');
+            bootstrap_theme_set_page_small_title('<strong>'.format_username($account).'</strong>');
+            bootstrap_theme_set_page_title_prefix_block('<div class="profile-picture"><img src="'.bootstrap_theme_get_user_picture($account).'" /></div>');
+
+            if (bootstrap_theme_is_contributor($account)) {
+                bootstrap_theme_set_page_title_block('<div class="profile-user-type">Contributor</div>');
+			} else {
+				bootstrap_theme_set_page_title_block('<div class="profile-user-type">Contributor<span>Pending Approval</span></div>');
+			}
+
+            break;
+
+        case 'bootstrap_theme_share_with_member_form':
+            $form['actions']['submit']['#ajax'] = array(
+                'callback' => 'ajax_bootstrap_theme_share_with_member_form_submit',
+                'wrapper' => 'share_with_member_form_container',
+                'event' => 'click',
+            );
+            break;
+            
+		case 'bootstrap_theme_new_message_form':
+            $form['actions']['submit']['#ajax'] = array(
+                'callback' => 'ajax_bootstrap_theme_new_message_form_submit',
+                'wrapper' => 'new_message_form_container',
+                'event' => 'click',
+            );
+            break;
+    }
+}
+
+/**
+ * Implements hook_username_alter
+ */
+function bootstrap_theme_username_alter(&$name, $account) {
+    if (!empty($account->field_first_name[LANGUAGE_NONE][0]['value']) && !empty($account->field_first_name[LANGUAGE_NONE][0]['value']))
+        $name = $account->field_first_name[LANGUAGE_NONE][0]['value'] . ' ' . $account->field_last_name[LANGUAGE_NONE][0]['value'];
+}
+
+function bootstrap_theme_apachesolr_search_page_alter(array &$build, array $search_page) {
+	bootstrap_theme_set_page_title_block('<div class="dashboard-search-form"></div>');
+}
+
+function bootstrap_theme_form_clas_network_object_beta_node_form_alter(&$form, &$form_state, $form_id) {
+  
+  $nid = '';
+  if(isset($form_state['node']->nid))
+  {
+  	$nid = $form_state['node']->nid;
+  }
+  
+	$query2 = db_select('field_data_field_cnob_assigned_badge', 'fcab');
+	$query2 = $query2->condition('fcab.entity_id', $nid, '=');
+	$query2 = $query2->fields('fcab', array('field_cnob_assigned_badge_value'));
+	$result2 = $query2->execute();
+	$badge_id = '';
+	foreach($result2 as $data2)
+	{
+		$badge_id = $data2->field_cnob_assigned_badge_value;
+	}
+  
+  $form['cno_badge'] = array(
+        '#type' => 'select',
+        '#title' => 'Badge this content',
+        '#attributes' => array(),
+        '#required' => FALSE,
+		'#default_value' => $badge_id,
+        '#options' => bootstrap_theme_get_user_badges()
+    );
+
+}

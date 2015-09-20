@@ -1,0 +1,17 @@
+name = Bootstrap Theme Module
+description = Bootstrap Theme Module
+package = Bootstrap Theme
+core = 7.x
+
+dependencies[] = "user"
+
+stylesheets[all][] = bootstrap_theme.css
+scripts[] = bootstrap_theme.js
+files[] = includes/page.profile.php
+
+; Information added by drupal.org packaging script on 2013-11-11
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "Bootstrap Theme Module"
+datestamp = "1370999542"
+
