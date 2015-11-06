@@ -87,7 +87,15 @@ function _bootstrap_theme_get_participants_html($participants) {
     foreach ($participants as $account) {
         if (!empty($output))
             $output .= ', ';
-        $output .= '<a href="'.url('user/'.$account->uid).'">'.format_username($account).'</a>';
+        //$output .= '<a href="'.url('user/'.$account->uid).'">'.format_username($account).'</a>';
+	if(isset($account->uid))
+        {
+		$output .= '<a href="'.url('user/'.$account->uid).'">'.format_username($account).'</a>';
+	}
+	else
+	{
+		$output .= format_username($account);
+	}
     }
 
     return $output;
