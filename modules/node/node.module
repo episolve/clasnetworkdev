@@ -1181,8 +1181,9 @@ function node_save($node) {
 
     // Update the node access table for this node. There's no need to delete
     // existing records if the node is new.
-    $delete = $op == 'update';
-    node_access_acquire_grants($node, $delete);
+    /*$delete = $op == 'update';
+    node_access_acquire_grants($node, $delete);*/
+    node_access_acquire_grants($node);// Update the node access table for this node. by Parimal Jariwala
 
     // Clear internal properties.
     unset($node->is_new);
