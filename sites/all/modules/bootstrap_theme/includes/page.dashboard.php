@@ -399,12 +399,14 @@ OR<br>https://youtu.be/XXXXX</i>',
 	}
 	$query2 = db_select('field_data_field_cnob_assigned_badge', 'fcab');
 	$query2 = $query2->condition('fcab.entity_id', $nid, '=');
-	$query2 = $query2->fields('fcab', array('field_cnob_assigned_badge_value'));
+	//$query2 = $query2->fields('fcab', array('field_cnob_assigned_badge_value'));
+	$query2 = $query2->fields('fcab', array('field_cnob_assigned_badge_nid'));
 	$result2 = $query2->execute();
 	$badge_id = '';
 	foreach($result2 as $data2)
 	{
-		$badge_id = $data2->field_cnob_assigned_badge_value;
+		//$badge_id = $data2->field_cnob_assigned_badge_value;
+		$badge_id = $data2->field_cnob_assigned_badge_nid;
 	}
 	$form['cno_badge'] = array(
         '#type' => 'select',
@@ -532,7 +534,7 @@ function bootstrap_theme_dashboard_contribute_create_form_submit(&$form, &$form_
     $contribution->cnob_content_area[$contribution->language][0]['value'] = OG_CONTENT_ACCESS_PRIVATE;
 	//$contribution->field_cnob_relevant_standards[$contribution->language][0]['tid'] = $form_state['values']['cno_relevant_standards'];
 	$contribution->field_cnob_lesson_plan[$contribution->language][0]['value'] = $form_state['values']['lesson_plan'];
-	$contribution->field_cnob_assigned_badge[$contribution->language][0]['value'] = $form_state['values']['cno_badge'];
+	$contribution->field_cnob_assigned_badge[$contribution->language][0]['nid'] = $form_state['values']['cno_badge'];
 	
 	if($file)
 	{
