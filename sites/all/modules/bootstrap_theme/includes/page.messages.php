@@ -109,7 +109,7 @@ function bootstrap_theme_messages_list_form_submit(&$form, &$form_state) {
             continue;
 
         if ($action == 'remove') {
-            //privatemsg_message_change_delete($message_id, 1);
+            privatemsg_message_change_delete($message_id, 1);
             $delete_value = REQUEST_TIME;
             $update = db_update('pm_index')
 			    ->fields(array('deleted' => $delete_value))
