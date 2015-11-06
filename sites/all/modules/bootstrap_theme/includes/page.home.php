@@ -82,7 +82,16 @@ function bootstrap_theme_home_page($banner = FALSE) {
 	            foreach (bootstrap_theme_get_taxonomy_vocabularies() as $key => $vocabulary) {
         			$i++;
 		            $output .= '<li class="'.(($i % 2 == 0)? 'last' : '').'">';
-		                $output .= '<img src="'.$base_url.'/sites/default/files/images/front/default_future.png" />';
+		                //$output .= '<img src="'.$base_url.'/sites/default/files/images/front/default_future.png" />';
+				if(!$vocabulary->imagepath)
+				{	
+					$output .= '<img src="'.$base_url.'/sites/default/files/images/front/default_future.png" />';
+				}
+				else
+				{
+					$output .= '<img src="'.file_create_url($vocabulary->imagepath).'"/>';
+				}
+
 		                $output .= '<a href="'.base_path().'category/'.$vocabulary->machine_name.'" class="category-title">'.$vocabulary->name.'</a>';
 		                $output .= '<div class="category-desc">'.$vocabulary->description.'</div>';
 		            $output .= '</li>';
