@@ -101,6 +101,16 @@ function bootstrap_theme_display_node_content($node) {
 				$output .= audiofield_get_player($audiofile, $op);
 				$output .= '</div>';
             }
+
+  	    //$fload_asso_mate = file_load($node->field_cnob_associated_materials['und'][0]['fid']);
+            //$asso_mate_file_uri = file_create_url($fload_asso_mate->uri);
+	    $asso_mate_file_uri = '';
+            if(isset($node->field_cnob_associated_materials['und']))
+            {
+		$fload_asso_mate = file_load($node->field_cnob_associated_materials['und'][0]['fid']);
+		$asso_mate_file_uri = file_create_url($fload_asso_mate->uri);
+	    }
+
             $area_of_study = taxonomy_term_load($node->field_cnob_area_of_study[$node->language][0]['tid']);
                 $output .= '<ul class="node-view-fields">';
                     $output .= '<li><strong>Category:</strong><span>'.taxonomy_term_load($node->field_cnob_category[$node->language][0]['tid'])->name.'</span></li>';
@@ -109,6 +119,13 @@ function bootstrap_theme_display_node_content($node) {
                     $output .= '<li><strong>Grade Level:</strong><span>'.taxonomy_term_load($node->field_cnob_grade_level[$node->language][0]['tid'])->name.'</span></li>';
                     $output .= '<li><strong>Relevant Standards:</strong><span>'.taxonomy_term_load($node->field_cnob_relevant_standards[$node->language][0]['tid'])->name.'</span></li>';
                     $output .= '<li><strong>Learning Object Type:</strong><span>'.$material_type.'</span></li>';
+		    
+		    //$output .= '<li><strong>Associated Materials:</strong><span><a href="'.$asso_mate_file_uri.'" target="_blank">'.$node->field_cnob_associated_materials[$node->language][0]['filename'].'</a></span></li>';
+		    if($asso_mate_file_uri != '')
+                    {
+			$output .= '<li><strong>Associated Materials:</strong><span><a href="'.$asso_mate_file_uri.'" target="_blank">'.$node->field_cnob_associated_materials[$node->language][0]['filename'].'</a></span></li>';
+		    }
+
 					if($material_type == 'Link')
 					{
 						$output .= '<li><strong>Learning Object Link:</strong><span><a href="'.$node->field_cnob_learn_obj_res_link[$node->language][0]['value'].'" target="_blank">'.$node->field_cnob_learn_obj_res_link[$node->language][0]['value'].'</a></span></li>';
