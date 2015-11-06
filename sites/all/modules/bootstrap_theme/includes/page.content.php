@@ -23,12 +23,14 @@ function bootstrap_theme_display_node_content($node) {
 	
 	$badge_uri = '';
 	$badge_img = '';
-	if(isset($node->field_cnob_assigned_badge[$node->language][0]['value']))
+	//if(isset($node->field_cnob_assigned_badge[$node->language][0]['value']))
+	if(isset($node->field_cnob_assigned_badge[$node->language][0]['nid']))
 	{
 		$query = db_select('file_managed', 'fm');
 		$query = $query->fields('fm', array('filename','uri'));
 		$query->leftJoin('field_data_field_badges_badge_image', 'fbbi', 'fbbi.field_badges_badge_image_fid=fm.fid');
-		$query->condition('fbbi.entity_id', $node->field_cnob_assigned_badge[$node->language][0]['value'], '=');
+		//$query->condition('fbbi.entity_id', $node->field_cnob_assigned_badge[$node->language][0]['value'], '=');
+		$query->condition('fbbi.entity_id', $node->field_cnob_assigned_badge[$node->language][0]['nid'], '=');
 		$result = $query->execute();
 		foreach($result as $data) {
 			$badge_uri = $data->uri;
