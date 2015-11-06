@@ -125,7 +125,10 @@ if(isset($contribution->field_cnob_photo['und'][0]['filename']))
 					}
 
 	                $output .= '<a href="'.base_path().'node/'.$contribution->nid.'" class="category-title">'.$contribution->title.'</a>';
+			if(isset($contribution->og_group_ref[$contribution->language]))
+			{
 	                $output .= '<a href="'.base_path().'node/'.$contribution->og_group_ref[$contribution->language][0]['target_id'].'" class="category-subtitle">'.node_load($contribution->og_group_ref[$contribution->language][0]['target_id'])->title.'</a>';
+			}
 	                $output .= '<div class="category-desc">'.(!empty($contribution->body[LANGUAGE_NONE])?$contribution->body[LANGUAGE_NONE][0]['value']:'').'</div>';
 	            $output .= '</li>';
 			}
