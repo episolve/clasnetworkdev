@@ -458,5 +458,19 @@ function bootstrap_theme_form_clas_network_object_beta_node_form_alter(&$form, &
 		'#default_value' => $badge_id,
         '#options' => bootstrap_theme_get_user_badges()
     );
+}
 
+function bootstrap_theme_form_node_form_alter(&$form, &$form_state, $form_id)
+{
+	global $user;
+	$nodeInfo = node_load($form['#node']->nid);
+	$author_id = $nodeInfo->uid;
+	$userInfo = user_load($user->uid);
+	$is_user_admin = in_array('administrator',$userInfo->roles);
+	if(!$is_user_admin && $author_id != $user->uid)
+	{
+		drupal_access_denied();
+		module_invoke_all('exit');
+		drupal_exit();
+	}
 }
