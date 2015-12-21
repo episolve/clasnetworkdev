@@ -211,14 +211,25 @@ function bootstrap_theme_display_node_content($node) {
 function bootstrap_theme_change_collection_form($form, &$form_state) {
 
     $node = $form_state['build_info']['args'][0];
+    $cnob_collections_array = array();
+    if(isset($node->field_cnob_collections[$node->language]) && count($node->field_cnob_collections[$node->language]) > 0)
+    {
+		for($cv=0; $cv<count($node->field_cnob_collections[$node->language]); $cv++)
+		{
+			$cnob_collections_array[] = $node->field_cnob_collections[$node->language][$cv]['nid'];
+		}
+	}
 
     $form['collection_id'] = array(
         '#type' => 'select',
         '#title' => 'Collection',
         '#attributes' => array(),
         '#required' => TRUE,
-        '#default_value' => (!empty($node->og_group_ref[LANGUAGE_NONE])?$node->og_group_ref[LANGUAGE_NONE][0]['target_id']:''),
-        '#options' => bootstrap_theme_get_collection_options(array('' => 'Add to a Collection'))
+        '#multiple' => TRUE,
+        '#attributes' => array('size'=>4),
+        '#options' => bootstrap_theme_get_collection_options(array('' => 'Add to a Collection(s)')),
+        //'#default_value' => (!empty($node->og_group_ref[LANGUAGE_NONE])?$node->og_group_ref[LANGUAGE_NONE][0]['target_id']:''),
+        '#default_value' => array_values($cnob_collections_array),
     );
     $form['nid'] = array(
         '#type' => 'hidden',
@@ -263,8 +274,19 @@ function theme_bootstrap_theme_change_collection_form($variables) {
 function bootstrap_theme_change_collection_form_submit(&$form, &$form_state) {
     $collection_form = $form_state['values'];
     $contribution = node_load($collection_form['nid']);
-	$contribution->field_cnob_collections[$contribution->language][0]['nid'] = $collection_form['collection_id'];
-    $contribution->og_group_ref[$contribution->language][0]['target_id'] = $collection_form['collection_id'];
+    
+    if(count($collection_form['collection_id']) > 0)
+	{
+		$cv = 0;
+		unset($contribution->field_cnob_collections[$contribution->language]);
+		foreach($collection_form['collection_id'] as $cval)
+		{
+			$contribution->field_cnob_collections[$contribution->language][$cv]['nid'] = $cval;
+			$cv++;
+		}
+	}
+	//$contribution->field_cnob_collections[$contribution->language][0]['nid'] = $collection_form['collection_id'];
+    //$contribution->og_group_ref[$contribution->language][0]['target_id'] = $collection_form['collection_id'];
     $contribution->group_content_access[$contribution->language][0]['value'] = OG_CONTENT_ACCESS_PRIVATE;
 
     node_object_prepare($contribution);
