@@ -62,7 +62,7 @@ function bootstrap_theme_get_all_collections() {
     return $result;
 }
 
-function bootstrap_theme_get_collection_options($empty = array('' => '<none>')) {
+function bootstrap_theme_get_collection_options($empty = array()) {
     $options = $empty;
     foreach (bootstrap_theme_get_collections() as $collection) {
         $options[$collection->nid] = $collection->title;
@@ -96,8 +96,8 @@ function bootstrap_theme_get_contributions($status = NODE_PUBLISHED, $account = 
 	
     $query = db_select('node', 'n');
     if (!empty($collection_id)) {
-        $query->join('og_membership"', 'ogm', 'ogm.etid=n.nid');
-        $query->condition('ogm.gid', $collection_id, '=');
+		$query->join('field_data_field_cnob_collections"', 'ogm', 'ogm.entity_id=n.nid');
+        $query->condition('ogm.field_cnob_collections_nid', $collection_id, '=');
 		//$query->condition('ogm.entity_type', 'node', '=');
     }
 	/*if($account != null)
@@ -105,9 +105,9 @@ function bootstrap_theme_get_contributions($status = NODE_PUBLISHED, $account = 
        $query = $query->condition('ogm.uid', $account->uid, '=');
 	}*/
 	
-    $query->leftJoin('comment', 'c', 'c.nid=n.nid');
+    //$query->leftJoin('comment', 'c', 'c.nid=n.nid');
     $query->fields('n', array('nid'));
-    $query->addExpression("COUNT(c.nid)", 'comment_count');
+    //$query->addExpression("COUNT(c.nid)", 'comment_count');
     $query->groupBy('n.nid');
     
     $result = $query
