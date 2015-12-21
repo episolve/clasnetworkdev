@@ -333,8 +333,9 @@ OR<br>https://youtu.be/XXXXX</i>',
 	
 	$form['og_group_ref'] = array(
         '#type' => 'select',
-        '#title' => 'Collections',
-        '#attributes' => array(),
+        '#multiple' => TRUE,
+        '#attributes' => array('size'=>4),
+        '#title' => 'Collection(s)',
         '#required' => TRUE,
 		'#description' => t($coll_msg),
         '#options' => bootstrap_theme_get_collection_options()
@@ -527,8 +528,19 @@ function bootstrap_theme_dashboard_contribute_create_form_submit(&$form, &$form_
 	$contribution->field_cnob_area_of_study[$contribution->language][0]['tid'] = $form_state['values']['cno_area_of_study'];
 	$contribution->field_cnob_grade_level[$contribution->language][0]['tid'] = $form_state['values']['cno_grade_level'];
 	$contribution->field_cnob_expiration_date[$contribution->language][0]['value'] = date('Y-m-d',strtotime($form_state['values']['expiration_date']));
-	$contribution->field_cnob_collections[$contribution->language][0]['nid'] = $form_state['values']['og_group_ref'];
-	$contribution->og_group_ref[$contribution->language][0]['target_id'] = $form_state['values']['og_group_ref'];
+	
+	if(count($form_state['values']['og_group_ref']) > 0)
+	{
+		$cv = 0;
+		foreach($form_state['values']['og_group_ref'] as $cval)
+		{
+			$contribution->field_cnob_collections[$contribution->language][$cv]['nid'] = $cval;
+			$cv++;
+		}
+	}
+	//$contribution->field_cnob_collections[$contribution->language][0]['nid'] = $form_state['values']['og_group_ref'];
+	//$contribution->og_group_ref[$contribution->language][0]['target_id'] = $form_state['values']['og_group_ref'];
+	
 	$contribution->field_cnob_content_area[$contribution->language][0] = array('tid' => $form_state['values']['cno_content_area'],);
 	$contribution->group_content_access[$contribution->language][0]['value'] = OG_CONTENT_ACCESS_PRIVATE;
     $contribution->cnob_content_area[$contribution->language][0]['value'] = OG_CONTENT_ACCESS_PRIVATE;
@@ -1290,14 +1302,25 @@ function bootstrap_theme_dashboard_contributors_to_approve_form_validate($form, 
 function bootstrap_theme_change_collection_form($form, &$form_state) {
 
     $node = $form_state['build_info']['args'][0];
+    $cnob_collections_array = array();
+    if(isset($node->field_cnob_collections[$node->language]) && count($node->field_cnob_collections[$node->language]) > 0)
+    {
+		for($cv=0; $cv<count($node->field_cnob_collections[$node->language]); $cv++)
+		{
+			$cnob_collections_array[] = $node->field_cnob_collections[$node->language][$cv]['nid'];
+		}
+	}
 
     $form['collection_id'] = array(
         '#type' => 'select',
-        '#title' => 'Collection',
+        '#title' => 'Collection(s)',
         '#attributes' => array(),
         '#required' => TRUE,
-        '#default_value' => (!empty($node->og_group_ref[LANGUAGE_NONE])?$node->og_group_ref[LANGUAGE_NONE][0]['target_id']:''),
-        '#options' => bootstrap_theme_get_collection_options(array('' => 'Add to a Collection'))
+        '#multiple' => TRUE,
+        '#attributes' => array('size'=>4),
+        '#options' => bootstrap_theme_get_collection_options(array('' => 'Add to a Collection(s)')),
+        //'#default_value' => (!empty($node->og_group_ref[LANGUAGE_NONE])?$node->og_group_ref[LANGUAGE_NONE][0]['target_id']:''),
+        '#default_value' => array_values($cnob_collections_array),
     );
     $form['nid'] = array(
         '#type' => 'hidden',
@@ -1344,8 +1367,23 @@ function bootstrap_theme_change_collection_form_submit(&$form, &$form_state) {
     $collection_form = $form_state['values'];
 	
     $contribution = node_load($collection_form['nid']);
-	$contribution->field_cnob_collections[$contribution->language][0]['nid'] = $collection_form['collection_id'];
-   	$contribution->og_group_ref[$contribution->language][0]['target_id'] = $collection_form['collection_id'];
+    
+    if(count($collection_form['collection_id']) > 0)
+	{
+		$cv = 0;
+		unset($contribution->field_cnob_collections[$contribution->language]);
+		foreach($collection_form['collection_id'] as $cval)
+		{
+			/*if($cv == 0 && count($contribution->field_cnob_collections[$contribution->language]) > 0)
+			{
+				$cv = count($contribution->field_cnob_collections[$contribution->language]);
+			}*/
+			$contribution->field_cnob_collections[$contribution->language][$cv]['nid'] = $cval;
+			$cv++;
+		}
+	}
+	//$contribution->field_cnob_collections[$contribution->language][0]['nid'] = $collection_form['collection_id'];
+   	//$contribution->og_group_ref[$contribution->language][0]['target_id'] = $collection_form['collection_id'];
     $contribution->group_content_access[$contribution->language][0]['value'] = OG_CONTENT_ACCESS_PRIVATE;
 	
     node_object_prepare($contribution);
