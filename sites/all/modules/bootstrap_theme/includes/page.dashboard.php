@@ -586,7 +586,7 @@ function bootstrap_theme_dashboard_contribute_create_form_submit(&$form, &$form_
 		$rs_vocabulary = taxonomy_vocabulary_load(TAXONOMY_VOCABULARY_ID_RELEVANT_STANDARDS);
 		$value_rs = array();
 		foreach ($typed_terms as $typed_term) {
-			if ($possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array(TAXONOMY_VOCABULARY_ID_TAGS)))) {
+			if ($possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array(TAXONOMY_VOCABULARY_ID_RELEVANT_STANDARDS)))) {
 				$term = array_pop($possibilities);
 			}
 			else {
